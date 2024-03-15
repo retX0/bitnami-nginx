@@ -42,7 +42,7 @@ jobs:
           fi
 
       - name: Setup yq
-        uses: mikefarah/yq@v4.12.0
+        uses: mikefarah/yq@master
 
       - name: Extract versions
         if: steps.check_modification.outputs.modified == 'true'
