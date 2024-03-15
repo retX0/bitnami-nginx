@@ -6,8 +6,8 @@ on:
     - cron: '* */2 * * *' # 每2小时触发, 对于一些更新不那么频繁的项目可以设置为每天一次, 低碳一点
 
 env:
-  FILE_PATH: ""
-  FILE_URL: ""
+  FILE_PATH: "upstream/Chart.yaml"
+  FILE_URL: "https://raw.githubusercontent.com/bitnami/charts/main/bitnami/nginx/Chart.yaml"
 
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
@@ -47,8 +47,8 @@ jobs:
         id: extract_versions
         run: |
           # TODO: 修改这个地方来匹配对应的 tag 和 version
-          VERSION=
-          VERSION_FULL=
+          VERSION=$(grep -oP 'appVersion:\s*\K\d+\.\d+\.\d+' $FILE_PATH)
+          VERSION_FULL=$(grep -oP 'docker.io/bitnami/nginx:\K\d+\.\d+\.\d+-debian-\d+-r\d+' $FILE_PATH) 
 
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "version_full=$VERSION_FULL" >> $GITHUB_OUTPUT
@@ -57,6 +57,8 @@ jobs:
         if: steps.check_modification.outputs.modified == 'true'
         run: |
           # TODO: 更改 Dockerfile 中的对应参数
+          sed -i "s/SOURCE_VERSION=[0-9.]*$/SOURCE_VERSION=${{ steps.extract_versions.outputs.version }}/" Dockerfile
+          sed -i "s/DOCKER_TAG=[0-9.]*-[a-zA-Z0-9-]*$/DOCKER_TAG=${{ steps.extract_versions.outputs.version_full }}/" Dockerfile
 
       - name: Upload file
         uses: actions/upload-artifact@v4
