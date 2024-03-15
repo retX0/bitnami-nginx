@@ -6,8 +6,8 @@ on:
     - cron: '* */2 * * *' # 每2小时触发, 对于一些更新不那么频繁的项目可以设置为每天一次, 低碳一点
 
 env:
-  FILE_PATH: "upstream/Chart.yaml"
-  FILE_URL: "https://raw.githubusercontent.com/bitnami/charts/main/bitnami/nginx/Chart.yaml"
+  FILE_PATH: "upstream/values.yaml"
+  FILE_URL: "https://raw.githubusercontent.com/bitnami/charts/main/bitnami/nginx/values.yaml"
 
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
@@ -22,7 +22,6 @@ jobs:
 
     outputs:
       modified: ${{ steps.check_modification.outputs.modified }}
-      version: ${{ steps.extract_versions.outputs.version }}
       version_full: ${{ steps.extract_versions.outputs.version_full }}
 
     steps:
@@ -42,13 +41,16 @@ jobs:
             echo "modified=true" >> $GITHUB_OUTPUT
           fi
 
+      - name: Setup yq
+        uses: mikefarah/yq@v4.12.0
+
       - name: Extract versions
         if: steps.check_modification.outputs.modified == 'true'
         id: extract_versions
         run: |
           # TODO: 修改这个地方来匹配对应的 tag 和 version
-          VERSION=$(grep -oP 'appVersion:\s*\K\d+\.\d+\.\d+' $FILE_PATH)
-          VERSION_FULL=$(grep -oP 'docker.io/bitnami/nginx:\K\d+\.\d+\.\d+-debian-\d+-r\d+' $FILE_PATH) 
+          VERSION_FULL=$(yq -r ".image.tag" $FILE_PATH)
+          VERSION=$(echo "$VERSION_FULL" | cut -d'-' -f1)
 
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "version_full=$VERSION_FULL" >> $GITHUB_OUTPUT
