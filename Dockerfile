@@ -44,11 +44,16 @@ RUN echo "load_module modules/ngx_http_js_module.so;" | cat - /opt/bitnami/nginx
 FROM bitnami/nginx:${DOCKER_TAG}
 USER root
 COPY --from=builder /opt/bitnami/nginx/modules/* /opt/bitnami/nginx/modules/
-COPY --from=builder /opt/bitnami/nginx/conf/nginx.conf /opt/bitnami/nginx/conf/nginx.conf
 ## Enable module
 RUN install_packages libxml2
 RUN mkdir -p /var/cache/nginx/emby/subs
 RUN chown 1001:0 -R /var/cache/nginx/emby
-RUN cat /opt/bitnami/nginx/conf/nginx.conf
+
+RUN echo "load_module modules/ngx_http_js_module.so;" | cat - /opt/bitnami/nginx/conf/nginx.conf > /tmp/nginx.conf && \
+    cp /tmp/nginx.conf /opt/bitnami/nginx/conf/nginx.conf
+RUN echo "load_module modules/ngx_http_js_module.so;" | cat - /opt/bitnami/nginx/conf.default/nginx.conf > /tmp/nginx.conf && \
+    cp /tmp/nginx.conf /opt/bitnami/nginx/conf.default/nginx.conf
+
+RUN rm /tmp/nginx.conf
 ## Set the container to be run as a non-root user by default
 USER 1001
