@@ -11,7 +11,7 @@ RUN install_packages dirmngr gpg gpg-agent curl build-essential git \
     libxml2 libxml2-dev libxslt-dev libgd-dev geoip-database libgeoip-dev
 ## Add trusted NGINX PGP key for tarball integrity verification
 RUN gpg --keyserver keyserver.ubuntu.com --recv-key ABF5BD827BD9BF62
-RUN curl -sSL https://nginx.org/keys/mdounin.key | gpg --import -
+RUN curl -sSL https://nginx.org/keys/nginx_signing.key | gpg --import -
 ## Download NGINX, verify integrity and extract
 RUN cd /tmp && \
     curl -O http://nginx.org/download/nginx-${SOURCE_VERSION}.tar.gz && \
