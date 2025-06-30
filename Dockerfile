@@ -1,5 +1,5 @@
 ARG SOURCE_VERSION=1.29.0
-ARG DOCKER_TAG=1.29.0-debian-12-r0
+ARG DOCKER_TAG=1.29.0-debian-12-r1
 
 FROM bitnami/nginx:${DOCKER_TAG} AS builder
 USER root
